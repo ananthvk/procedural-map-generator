@@ -40,3 +40,4 @@ builddir/
 subprojects/googletest-*
 subprojects/packagecache
 a.out
+builddir/*
