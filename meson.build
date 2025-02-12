@@ -29,6 +29,7 @@ if meson.get_compiler('cpp').get_id() == 'clang'
         '-D_FORTIFY_SOURCE=2',
         '-fstack-protector',
         '-Wno-unused-parameter',
+        '-Wno-implicit-int-float-conversion'
     ]
 else
     extra_args = []
@@ -38,7 +39,9 @@ raylib = dependency('raylib')
 fmt = dependency('fmt')
 srcs = [
     'main.cpp',
-    'noise.cpp'
+    'noise.cpp',
+    'chunk.cpp',
+    'chunk_renderer.cpp'
 ]
 
 executable(

@@ -7,6 +7,10 @@ NoiseGenerator::NoiseGenerator()
 {
     seed_ = static_cast<int>(time(NULL));
     noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
+    noise.SetFrequency(0.01f);
+    noise.SetFractalLacunarity(2.0f);
+    noise.SetFractalGain(0.5f);
+    noise.SetFractalType(FastNoiseLite::FractalType_FBm);
     noise.SetSeed(seed_);
 }
 
