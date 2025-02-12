@@ -1,0 +1,4 @@
+title=Procedural Map Generator
+fps=60
+width=800
+height=800

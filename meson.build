@@ -2,7 +2,7 @@ project(
     'mapgen',
     'cpp',
     version: '0.1',
-    default_options: ['warning_level=3', 'cpp_std=c++14'],
+    default_options: ['warning_level=3', 'cpp_std=c++17'],
 )
 if meson.get_compiler('cpp').get_id() == 'clang'
     extra_args = [
