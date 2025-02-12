@@ -36,7 +36,10 @@ endif
 
 raylib = dependency('raylib')
 fmt = dependency('fmt')
-srcs = ['main.cpp']
+srcs = [
+    'main.cpp',
+    'noise.cpp'
+]
 
 executable(
     'mapgen',
