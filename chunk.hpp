@@ -1,5 +1,6 @@
 #ifndef A_CHUNK_H
 #define A_CHUNK_H
+#include "confparse.hpp"
 #include <memory>
 #include <vector>
 
@@ -50,7 +51,7 @@ class ChunkFactory
     std::vector<std::unique_ptr<Layer>> layers;
 
   public:
-    ChunkFactory();
+    auto from_config(const confparse::Config &cfg) -> void;
 
     auto add_layer(std::unique_ptr<Layer> layer) -> void;
 

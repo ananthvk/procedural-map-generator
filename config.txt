@@ -1,4 +1,6 @@
-title=Procedural Map Generator
+title=Map Generator
 fps=60
 width=800
 height=800
+seed=31
+scale=0.5
