@@ -8,6 +8,24 @@ using namespace logger;
 
 const char *config_file_path = "config.txt";
 
+auto get_color(float elevation) -> Color
+{
+    if (elevation < 0.2)
+        // Deep Ocean
+        return {52, 100, 235, 255};
+    if (elevation < 0.5)
+        // Lighter ocean
+        return {52, 156, 235, 255};
+    if (elevation < 0.8)
+        // Land
+        return {57, 153, 18, 255};
+    if (elevation < 0.9)
+        // Inlands
+        return {18, 110, 4, 255};
+    else
+        return {227, 193, 232, 255};
+}
+
 class NoiseMap
 {
     int width, height;
@@ -53,8 +71,8 @@ class NoiseMap
         {
             for (int x = 0; x < width; ++x)
             {
-                unsigned char value = static_cast<unsigned char>(elevation[y][x] * 255);
-                Color col = {value, value, value, 255};
+                // unsigned char value = static_cast<unsigned char>(elevation[y][x] * 255);
+                Color col = get_color(elevation[y][x]);
                 pixels[y * width + x] = col;
             }
         }
