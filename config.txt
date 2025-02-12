@@ -1,6 +1,22 @@
+# General settings
 title=Map Generator
 fps=60
 width=800
 height=800
-seed=31
-scale=0.5
+reload_interval=0.5 # In seconds, during development how often to reload from file
+
+# Master seed
+seed=91
+
+# Terrain generation settings
+scale=400
+redistribution=2.8
+fudge=1.1
+
+# Biome settings
+ocean_elevation = 0.1
+water_elevation = 0.25
+beach_elevation = 0.3
+grassland_elevation = 0.5
+rockland_elevation = 0.7
+mountain_elevation = 0.9

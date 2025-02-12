@@ -69,6 +69,8 @@ auto ChunkFactory::add_layer(std::unique_ptr<Layer> layer) -> void
 
 auto ChunkFactory::from_config(const confparse::Config &cfg) -> void
 {
+    layers.clear();
+
     int width = cfg.get("width").parse<int>();
     int height = cfg.get("width").parse<int>();
     int master_seed = cfg.get("seed").parse<int>();

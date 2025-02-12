@@ -39,6 +39,11 @@ class ValueType
   public:
     ValueType() : is_empty_(true) {}
 
+    auto operator==(const ValueType &other) const -> bool
+    {
+        return val == other.val && is_empty_ == other.is_empty_;
+    }
+
     template <typename T> ValueType(const T &value) : is_empty_{false}
     {
         if constexpr (std::is_same<T, bool>::value)
@@ -182,6 +187,8 @@ class Config
         }
     }
 
+    auto operator==(const Config &other) const -> bool { return cfg_map == other.cfg_map; }
+
     auto begin() { return cfg_map.begin(); }
 
     auto end() { return cfg_map.end(); }
@@ -215,7 +222,6 @@ struct ConfigParserOptions
 class ConfigParser
 {
   private:
-
     // Line number of current line being processed, useful in error messages
     size_t line_no;
     // Also store current line, useful for error reporting
@@ -267,7 +273,8 @@ class ConfigParser
         // It ignores all other escape sequences
 
         char previous_character = line[0];
-        auto is_first_char_comment = options.single_line_comments.find(line[0]) != std::string::npos;
+        auto is_first_char_comment =
+            options.single_line_comments.find(line[0]) != std::string::npos;
         if (is_first_char_comment)
         {
             // If the first character is itself a comment character, skip the entire process
