@@ -35,6 +35,8 @@ else
     extra_args = []
 endif
 
+add_project_arguments('-DCONFIG_FILE_PATH="../config.txt"', language: 'cpp')
+
 raylib = dependency('raylib')
 fmt = dependency('fmt')
 srcs = [

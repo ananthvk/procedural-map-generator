@@ -19,6 +19,8 @@ class Engine
     Chunk chunk;
 
     int width, height, FPS, reload_interval;
+    bool fullscreen;
+    bool is_currently_in_fullscreen;
     std::string title;
     
     bool config_changed;

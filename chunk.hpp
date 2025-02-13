@@ -4,12 +4,38 @@
 #include <memory>
 #include <vector>
 
+// Whittaker classification
+// https://en.wikipedia.org/wiki/Biome
+enum class Biome
+{
+    // Terrestrial biomes
+    ICE_DESERT,
+    TUNDRA,
+    BOREAL_FOREST,
+    SHRUBLAND,
+    TEMPERATE_GRASSLAND,
+    TROPICAL_DESERT,
+    SAVANNA,
+    TEMPERATE_FOREST,
+    TEMPERATE_RAINFOREST,
+    TROPICAL_RAINFOREST,
+    MOUNTAIN,
+    
+    // Aquatic biomes
+    LAKE,
+    RIVER,
+    SHALLOW_OCEAN,
+    DEEP_OCEAN,
+    
+};
+
 struct Chunk
 {
     int width;
     int master_seed;
     int height;
     std::vector<float> elevation;
+    std::vector<Biome> biome;
 };
 
 enum class LayerType

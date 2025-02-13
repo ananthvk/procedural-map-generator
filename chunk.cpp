@@ -17,6 +17,7 @@ class InitializationLayer : public InPlaceLayer
         chunk.height = height;
         chunk.master_seed = master_seed;
         chunk.elevation = std::vector<float>(width * height, 0.5f);
+        chunk.biome = std::vector<Biome>(width * height, Biome::TEMPERATE_GRASSLAND);
     }
 };
 

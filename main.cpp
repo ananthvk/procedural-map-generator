@@ -2,7 +2,9 @@
 
 using namespace logger;
 
+#ifndef CONFIG_FILE_PATH
 const char *CONFIG_FILE_PATH = "config.txt";
+#endif
 
 auto main(int argc, char *argv[]) -> int
 {

@@ -16,6 +16,7 @@ auto Engine::load_config(const std::string &config_path) -> void
     height = cfg.get("height").parse<int>();
     FPS = cfg.get("fps").parse<int>();
     title = cfg.get("title").as_string();
+    fullscreen = cfg.get("fullscreen").try_parse<bool>(false);
     reload_interval = cfg.get("reload_interval").try_parse<int>(1);
     config_changed = true;
 }
@@ -28,6 +29,18 @@ auto Engine::apply_config(bool is_update) -> void
     factory.from_config(cfg);
     renderer.from_config(cfg);
     SetTargetFPS(FPS);
+    SetWindowSize(width, height);
+    SetWindowTitle(title.c_str());
+    if (!is_currently_in_fullscreen && fullscreen)
+    {
+        ToggleFullscreen();
+        is_currently_in_fullscreen = true;
+    }
+    else if (is_currently_in_fullscreen && !fullscreen)
+    {
+        ToggleFullscreen();
+        is_currently_in_fullscreen = false;
+    }
     chunk = factory.execute();
     if (is_update)
         renderer.update_texture(chunk_texture, chunk);
@@ -35,7 +48,8 @@ auto Engine::apply_config(bool is_update) -> void
         chunk_texture = renderer.generate_texture(chunk);
 }
 
-Engine::Engine(const std::string &config_file_path) : config_changed(true)
+Engine::Engine(const std::string &config_file_path)
+    : is_currently_in_fullscreen(false), config_changed(true)
 {
     info("Creating engine...");
     load_config(config_file_path);
