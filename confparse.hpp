@@ -230,12 +230,16 @@ class ConfigParser
     // Trim the string by removing spaces at both ends, inplace
     std::string &ltrim(std::string &s)
     {
+        if (s.empty())
+            return s;
         s.erase(0, s.find_first_not_of(options.whitespace_characters));
         return s;
     }
 
     std::string &rtrim(std::string &s)
     {
+        if (s.empty())
+            return s;
         s.erase(s.find_last_not_of(options.whitespace_characters) + 1);
         return s;
     }

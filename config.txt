@@ -6,17 +6,27 @@ height=800
 reload_interval=0.5 # In seconds, during development how often to reload from file
 
 # Master seed
-seed=91
+seed=551
 
 # Terrain generation settings
-scale=400
-redistribution=2.8
+scale=40
+redistribution=1
 fudge=1.1
 
+frequency1=1
+frequency2=4
+frequency3=32
+frequency4=64
+
+amplitude1=1
+amplitude2=0.5
+amplitude3=0.20
+amplitude4=0.10
+
 # Biome settings
-ocean_elevation = 0.1
-water_elevation = 0.25
-beach_elevation = 0.3
-grassland_elevation = 0.5
-rockland_elevation = 0.7
-mountain_elevation = 0.9
+ocean_elevation = 0.4
+water_elevation = 0.5
+beach_elevation = 0.55
+grassland_elevation = 0.60
+rockland_elevation = 0.65
+mountain_elevation = 0.78

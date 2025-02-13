@@ -41,7 +41,8 @@ srcs = [
     'main.cpp',
     'noise.cpp',
     'chunk.cpp',
-    'chunk_renderer.cpp'
+    'chunk_renderer.cpp',
+    'engine.cpp'
 ]
 
 executable(
