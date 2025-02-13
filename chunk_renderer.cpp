@@ -29,7 +29,7 @@ auto ChunkRenderer2D::generate_texture(const Chunk &chunk) const -> ChunkTexture
     {
         for (int x = 0; x < texture.width; ++x)
         {
-            texture.pixels[y * texture.width + x] = get_color(chunk.elevation[idx]);
+            texture.pixels[y * texture.width + x] = get_color(chunk.biome[idx]);
             idx++;
         }
     }
@@ -63,37 +63,29 @@ auto ChunkRenderer2D::update_texture(ChunkTexture2D &texture, const Chunk &chunk
     {
         for (int x = 0; x < texture.width; ++x)
         {
-            texture.pixels[y * texture.width + x] = get_color(chunk.elevation[idx]);
+            texture.pixels[y * texture.width + x] = get_color(chunk.biome[idx]);
             idx++;
         }
     }
     UpdateTexture(texture.texture, texture.pixels);
 }
 
-auto ChunkRenderer2D::from_config(const confparse::Config &cfg) -> void
-{
-    ocean_elevation = cfg.get("ocean_elevation").parse<float>();
-    water_elevation = cfg.get("water_elevation").parse<float>();
-    beach_elevation = cfg.get("beach_elevation").parse<float>();
-    grassland_elevation = cfg.get("grassland_elevation").parse<float>();
-    rockland_elevation = cfg.get("rockland_elevation").parse<float>();
-    mountain_elevation = cfg.get("mountain_elevation").parse<float>();
-}
+auto ChunkRenderer2D::from_config(const confparse::Config &cfg) -> void {}
 
-auto ChunkRenderer2D::get_color(float elevation) const -> Color
+auto ChunkRenderer2D::get_color(Biome biome) const -> Color
 {
-    if (elevation < ocean_elevation)
+    if (biome == Biome::DEEP_OCEAN)
         return {35, 52, 105, 255};
-    else if (elevation < water_elevation)
+    else if (biome == Biome::SHALLOW_OCEAN)
         return {78, 98, 159, 255};
-    else if (elevation < beach_elevation)
+    else if (biome == Biome::BEACH)
         return {208, 181, 138, 255};
-    else if (elevation < grassland_elevation)
+    else if (biome == Biome::TEMPERATE_GRASSLAND)
         return {74, 90, 64, 255};
-    else if (elevation < rockland_elevation)
+    else if (biome == Biome::SHRUBLAND)
         return {57, 76, 56, 255};
-    else if (elevation < mountain_elevation)
+    else if (biome == Biome::MOUNTAIN)
         return {46, 46, 35, 255};
     else
-        return {220, 222, 219, 255};
+        return {0, 0, 0, 255};
 }

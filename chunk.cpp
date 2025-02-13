@@ -23,8 +23,8 @@ class InitializationLayer : public InPlaceLayer
 
 class TerrainGenerationLayer : public InPlaceLayer
 {
-    float map_scale, redistribution, fudge, frequency1, frequency2, frequency3, frequency4, amplitude1,
-        amplitude2, amplitude3, amplitude4;
+    float map_scale, redistribution, fudge, frequency1, frequency2, frequency3, frequency4,
+        amplitude1, amplitude2, amplitude3, amplitude4;
 
   public:
     TerrainGenerationLayer(const confparse::Config &cfg)
@@ -86,6 +86,56 @@ class TerrainGenerationLayer : public InPlaceLayer
     }
 };
 
+class BiomeCreationLayer : public InPlaceLayer
+{
+    float ocean_elevation;
+    float water_elevation;
+    float beach_elevation;
+    float grassland_elevation;
+    float rockland_elevation;
+    float mountain_elevation;
+
+  public:
+    BiomeCreationLayer(const confparse::Config &cfg)
+    {
+        ocean_elevation = cfg.get("ocean_elevation").parse<float>();
+        water_elevation = cfg.get("water_elevation").parse<float>();
+        beach_elevation = cfg.get("beach_elevation").parse<float>();
+        grassland_elevation = cfg.get("grassland_elevation").parse<float>();
+        rockland_elevation = cfg.get("rockland_elevation").parse<float>();
+        mountain_elevation = cfg.get("mountain_elevation").parse<float>();
+    }
+
+    auto execute(Chunk &chunk) const -> void
+    {
+        int idx = 0;
+        for (int y = 0; y < chunk.height; ++y)
+        {
+            for (int x = 0; x < chunk.width; ++x)
+            {
+                float elevation = chunk.elevation[idx];
+                Biome biome;
+                if (elevation < ocean_elevation)
+                    biome = Biome::DEEP_OCEAN;
+                else if (elevation < water_elevation)
+                    biome = Biome::SHALLOW_OCEAN;
+                else if (elevation < beach_elevation)
+                    biome = Biome::BEACH;
+                else if (elevation < grassland_elevation)
+                    biome = Biome::TEMPERATE_GRASSLAND;
+                else if (elevation < rockland_elevation)
+                    biome = Biome::SHRUBLAND;
+                else if (elevation < mountain_elevation)
+                    biome = Biome::MOUNTAIN;
+                else
+                    biome = Biome::SAVANNA;
+                chunk.biome[idx] = biome;
+                idx++;
+            }
+        }
+    }
+};
+
 auto ChunkFactory::add_layer(std::unique_ptr<Layer> layer) -> void
 {
     layers.push_back(std::move(layer));
@@ -101,6 +151,7 @@ auto ChunkFactory::from_config(const confparse::Config &cfg) -> void
 
     layers.push_back(std::make_unique<InitializationLayer>(width, height, master_seed));
     layers.push_back(std::make_unique<TerrainGenerationLayer>(cfg));
+    layers.push_back(std::make_unique<BiomeCreationLayer>(cfg));
 }
 
 auto ChunkFactory::execute() const -> Chunk

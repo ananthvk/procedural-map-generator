@@ -20,13 +20,13 @@ enum class Biome
     TEMPERATE_RAINFOREST,
     TROPICAL_RAINFOREST,
     MOUNTAIN,
-    
+
     // Aquatic biomes
+    BEACH,
     LAKE,
     RIVER,
     SHALLOW_OCEAN,
     DEEP_OCEAN,
-    
 };
 
 struct Chunk
