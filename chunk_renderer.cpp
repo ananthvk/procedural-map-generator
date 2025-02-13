@@ -29,7 +29,7 @@ auto ChunkRenderer2D::generate_texture(const Chunk &chunk) const -> ChunkTexture
     {
         for (int x = 0; x < texture.width; ++x)
         {
-            texture.pixels[y * texture.width + x] = get_color(chunk.biome[idx]);
+            texture.pixels[y * texture.width + x] = get_color(chunk, idx);
             idx++;
         }
     }
@@ -63,29 +63,58 @@ auto ChunkRenderer2D::update_texture(ChunkTexture2D &texture, const Chunk &chunk
     {
         for (int x = 0; x < texture.width; ++x)
         {
-            texture.pixels[y * texture.width + x] = get_color(chunk.biome[idx]);
+            texture.pixels[y * texture.width + x] = get_color(chunk, idx);
             idx++;
         }
     }
     UpdateTexture(texture.texture, texture.pixels);
 }
 
-auto ChunkRenderer2D::from_config(const confparse::Config &cfg) -> void {}
-
-auto ChunkRenderer2D::get_color(Biome biome) const -> Color
+auto ChunkRenderer2D::from_config(const confparse::Config &cfg) -> void
 {
-    if (biome == Biome::DEEP_OCEAN)
-        return {35, 52, 105, 255};
-    else if (biome == Biome::SHALLOW_OCEAN)
-        return {78, 98, 159, 255};
-    else if (biome == Biome::BEACH)
-        return {208, 181, 138, 255};
-    else if (biome == Biome::TEMPERATE_GRASSLAND)
-        return {74, 90, 64, 255};
-    else if (biome == Biome::SHRUBLAND)
-        return {57, 76, 56, 255};
-    else if (biome == Biome::MOUNTAIN)
-        return {46, 46, 35, 255};
+    auto render_type = cfg.get("render_type").as_string();
+    if (render_type == "elevation_heightmap")
+    {
+        current_render_mode = RenderMode::ELEVATION_HEIGHTMAP;
+    }
+    else if (render_type == "moisture_heightmap")
+    {
+        current_render_mode = RenderMode::MOISTURE_HEIGHTMAP;
+    }
+    else if (render_type == "biome_map")
+    {
+        current_render_mode = RenderMode::BIOME_MAP;
+    }
     else
-        return {0, 0, 0, 255};
+    {
+        throw std::runtime_error("Unknown render type: " + render_type);
+    }
+}
+
+auto ChunkRenderer2D::get_color(const Chunk &chunk, int idx) const -> Color
+{
+    if (current_render_mode == RenderMode::BIOME_MAP)
+    {
+        auto biome = chunk.biome[idx];
+        if (biome == Biome::DEEP_OCEAN)
+            return {35, 52, 105, 255};
+        else if (biome == Biome::SHALLOW_OCEAN)
+            return {78, 98, 159, 255};
+        else if (biome == Biome::BEACH)
+            return {208, 181, 138, 255};
+        else if (biome == Biome::TEMPERATE_GRASSLAND)
+            return {74, 90, 64, 255};
+        else if (biome == Biome::SHRUBLAND)
+            return {57, 76, 56, 255};
+        else if (biome == Biome::MOUNTAIN)
+            return {46, 46, 35, 255};
+        else
+            return {0, 0, 0, 255};
+    }
+    else if (current_render_mode == RenderMode::ELEVATION_HEIGHTMAP)
+    {
+        unsigned char value = static_cast<unsigned char>(chunk.elevation[idx] * 255);
+        return {value, value, value, 255};
+    }
+
 }

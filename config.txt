@@ -13,7 +13,7 @@ reload_interval = 0.5
 seed = 813
 
 # Global map scale
-scale = 20
+scale = 60
 
 # Terrain generation settings
 # ============================== 
@@ -22,13 +22,13 @@ fudge = 1.1
 
 frequency1 = 1
 frequency2 = 4
-frequency3 = 8
+frequency3 = 18
 frequency4 = 64
 
 amplitude1 = 1
 amplitude2 = 0.5
-amplitude3 = 0.25
-amplitude4 = 0.0725
+amplitude3 = 0.125
+amplitude4 = 0.0120
 
 
 # Biome settings
@@ -42,5 +42,6 @@ mountain_elevation = 0.78
 
 # Renderer settings
 # ============================== 
-# Can be one of the following: "biome_map", "elevation_map"
+# Can be one of the following: "biome_map", "elevation_heightmap"
 render_type = biome_map
+# render_type = elevation_heightmap
