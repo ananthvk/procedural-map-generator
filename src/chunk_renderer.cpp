@@ -96,20 +96,28 @@ auto ChunkRenderer2D::get_color(const Chunk &chunk, int idx) const -> Color
     if (current_render_mode == RenderMode::BIOME_MAP)
     {
         auto biome = chunk.biome[idx];
-        if (biome == Biome::DEEP_OCEAN)
-            return {35, 52, 105, 255};
-        else if (biome == Biome::SHALLOW_OCEAN)
+        if (biome == Biome::SHALLOW_OCEAN)
             return {78, 98, 159, 255};
-        else if (biome == Biome::BEACH)
+        if (biome == Biome::BEACH)
             return {208, 181, 138, 255};
-        else if (biome == Biome::TEMPERATE_GRASSLAND)
-            return {74, 90, 64, 255};
-        else if (biome == Biome::SHRUBLAND)
+        if (biome == Biome::TUNDRA)
+            return {196, 213, 227, 255};
+        if (biome == Biome::ICE_DESERT)
+            return {194, 240, 255, 255};
+        if (biome == Biome::SHRUBLAND)
             return {57, 76, 56, 255};
-        else if (biome == Biome::MOUNTAIN)
-            return {46, 46, 35, 255};
-        else
-            return {0, 0, 0, 255};
+        if (biome == Biome::BOREAL_FOREST)
+            return {45, 67, 49, 255};
+        if (biome == Biome::TEMPERATE_GRASSLAND)
+            return {106, 137, 61, 255};
+        if (biome == Biome::TEMPERATE_RAINFOREST)
+            return {37, 50, 56, 255};
+        if (biome == Biome::TROPICAL_DESERT)
+            return {255, 204, 82, 255};
+        if (biome == Biome::SAVANNA)
+            return {208, 176, 97, 255};
+        if (biome == Biome::TROPICAL_RAINFOREST)
+            return {38, 81, 32, 255};
     }
     else if (current_render_mode == RenderMode::ELEVATION_HEIGHTMAP)
     {
@@ -121,5 +129,4 @@ auto ChunkRenderer2D::get_color(const Chunk &chunk, int idx) const -> Color
         unsigned char value = static_cast<unsigned char>(chunk.moisture[idx] * 255);
         return {value, value, value, 255};
     }
-
 }

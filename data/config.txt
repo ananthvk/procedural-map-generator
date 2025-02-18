@@ -17,7 +17,7 @@ global_map_scale = 60       # Unused
 
 # Terrain generation settings
 # ============================== 
-terrain.scale = 40
+terrain.scale = 500
 terrain.redistribution = 1 
 terrain.fudge = 1.1
 terrain.frequency1 = 1
@@ -32,8 +32,8 @@ terrain.amplitude4 = 0.0140
 
 # Moisture settings
 # ===========================
-moisture.scale = 60
-moisture.redistribution = 1 
+moisture.scale = 900
+moisture.redistribution =  1
 moisture.fudge = 1.1
 moisture.frequency1 = 1
 moisture.frequency2 = 4
@@ -47,15 +47,25 @@ moisture.amplitude4 = 0.0120
 
 # Biome settings
 # ============================== 
-ocean_elevation = 0.4
-water_elevation = 0.45
-beach_elevation = 0.58
-grassland_elevation = 0.60
-rockland_elevation = 0.65
-mountain_elevation = 0.78
+deep_ocean_elevation = 0.3
+shallow_ocean_elevation = 0.4
+beach_elevation = 0.45
+ice_desert_elevation = 0.45
+tundra_elevation = 0.45
+boreal_forest_elevation = 0.6
+shrubland_elevation = 0.5
+temperate_grassland_elevation = 0.5
+tropical_desert_elevation = 0.45
+savanna_elevation = 0.5
+temperate_forest_elevation = 0.5
+temperate_rainforest_elevation = 0.5
+tropical_rainforest_elevation = 0.6
+mountain_elevation = 0.8
+
 
 # Renderer settings
 # ============================== 
 # Can be one of the following: "biome_map", "elevation_heightmap", "moisture_heightmap"
 render_type = biome_map
 #render_type = moisture_heightmap
+#render_type = elevation_heightmap

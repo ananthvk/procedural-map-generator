@@ -35,21 +35,9 @@ else
     extra_args = []
 endif
 
-add_project_arguments('-DCONFIG_FILE_PATH="../config.txt"', language: 'cpp')
-
+add_project_arguments('-DCONFIG_FILE_PATH="../data/config.txt"', language: 'cpp')
+include_dirs = include_directories(['include'])
 raylib = dependency('raylib')
 fmt = dependency('fmt')
-srcs = [
-    'main.cpp',
-    'noise.cpp',
-    'chunk.cpp',
-    'chunk_renderer.cpp',
-    'engine.cpp'
-]
 
-executable(
-    'mapgen',
-    sources: srcs,
-    dependencies: [raylib, fmt],
-    cpp_args: extra_args,
-)
+subdir('src')

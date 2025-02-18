@@ -133,16 +133,16 @@ class MoistureGenerationLayer : public InPlaceLayer
                 float ny = static_cast<float>(y) / chunk.height - 0.5;
 
                 float moisture = amplitude1 * generator1.at(frequency1 * map_scale * nx,
-                                                             frequency1 * map_scale * ny);
+                                                            frequency1 * map_scale * ny);
 
-                moisture += amplitude2 * generator2.at(frequency2 * map_scale * nx,
-                                                        frequency2 * map_scale * ny);
+                moisture += amplitude2 *
+                            generator2.at(frequency2 * map_scale * nx, frequency2 * map_scale * ny);
 
-                moisture += amplitude3 * generator3.at(frequency3 * map_scale * nx,
-                                                        frequency3 * map_scale * ny);
+                moisture += amplitude3 *
+                            generator3.at(frequency3 * map_scale * nx, frequency3 * map_scale * ny);
 
-                moisture += amplitude4 * generator4.at(frequency4 * map_scale * nx,
-                                                        frequency4 * map_scale * ny);
+                moisture += amplitude4 *
+                            generator4.at(frequency4 * map_scale * nx, frequency4 * map_scale * ny);
 
                 moisture = moisture / (amplitude1 + amplitude2 + amplitude3 + amplitude4);
                 moisture = std::powf(moisture * fudge, redistribution);
@@ -152,23 +152,76 @@ class MoistureGenerationLayer : public InPlaceLayer
     }
 };
 
+Biome getBiome(float e, float m)
+{
+    if (e < 0.35)
+        return Biome::SHALLOW_OCEAN;
+    if (e < 0.38)
+        return Biome::BEACH;
+
+    if (e > 0.8)
+    {
+        if (m < 0.5)
+            return Biome::TUNDRA;
+        return Biome::ICE_DESERT;
+    }
+
+    if (e > 0.6)
+    {
+        if (m < 0.66)
+            return Biome::SHRUBLAND;
+        return Biome::BOREAL_FOREST;
+    }
+
+    if (e > 0.3)
+    {
+        if (m < 0.50)
+            return Biome::TEMPERATE_GRASSLAND;
+        return Biome::TEMPERATE_RAINFOREST;
+    }
+
+    if (m < 0.16)
+        return Biome::TROPICAL_DESERT;
+    if (m < 0.33)
+        return Biome::SAVANNA;
+    if (m < 0.66)
+        return Biome::TROPICAL_RAINFOREST;
+    return Biome::TROPICAL_RAINFOREST;
+}
+
 class BiomeCreationLayer : public InPlaceLayer
 {
-    float ocean_elevation;
-    float water_elevation;
     float beach_elevation;
-    float grassland_elevation;
-    float rockland_elevation;
+    float shallow_ocean_elevation;
+    float deep_ocean_elevation;
+    float ice_desert_elevation;
+    float tundra_elevation;
+    float boreal_forest_elevation;
+    float shrubland_elevation;
+    float temperate_grassland_elevation;
+    float tropical_desert_elevation;
+    float savanna_elevation;
+    float temperate_forest_elevation;
+    float temperate_rainforest_elevation;
+    float tropical_rainforest_elevation;
     float mountain_elevation;
 
   public:
     BiomeCreationLayer(const confparse::Config &cfg)
     {
-        ocean_elevation = cfg.get("ocean_elevation").parse<float>();
-        water_elevation = cfg.get("water_elevation").parse<float>();
         beach_elevation = cfg.get("beach_elevation").parse<float>();
-        grassland_elevation = cfg.get("grassland_elevation").parse<float>();
-        rockland_elevation = cfg.get("rockland_elevation").parse<float>();
+        shallow_ocean_elevation = cfg.get("shallow_ocean_elevation").parse<float>();
+        deep_ocean_elevation = cfg.get("deep_ocean_elevation").parse<float>();
+        ice_desert_elevation = cfg.get("ice_desert_elevation").parse<float>();
+        tundra_elevation = cfg.get("tundra_elevation").parse<float>();
+        boreal_forest_elevation = cfg.get("boreal_forest_elevation").parse<float>();
+        shrubland_elevation = cfg.get("shrubland_elevation").parse<float>();
+        temperate_grassland_elevation = cfg.get("temperate_grassland_elevation").parse<float>();
+        tropical_desert_elevation = cfg.get("tropical_desert_elevation").parse<float>();
+        savanna_elevation = cfg.get("savanna_elevation").parse<float>();
+        temperate_forest_elevation = cfg.get("temperate_forest_elevation").parse<float>();
+        temperate_rainforest_elevation = cfg.get("temperate_rainforest_elevation").parse<float>();
+        tropical_rainforest_elevation = cfg.get("tropical_rainforest_elevation").parse<float>();
         mountain_elevation = cfg.get("mountain_elevation").parse<float>();
     }
 
@@ -180,23 +233,7 @@ class BiomeCreationLayer : public InPlaceLayer
             for (int x = 0; x < chunk.width; ++x)
             {
                 float elevation = chunk.elevation[idx];
-                Biome biome;
-                if (elevation < ocean_elevation)
-                    biome = Biome::DEEP_OCEAN;
-                else if (elevation < water_elevation)
-                    biome = Biome::SHALLOW_OCEAN;
-                else if (elevation < beach_elevation)
-                    biome = Biome::BEACH;
-
-                else if (elevation < grassland_elevation)
-                    biome = Biome::TEMPERATE_GRASSLAND;
-                else if (elevation < rockland_elevation)
-                    biome = Biome::SHRUBLAND;
-                else if (elevation < mountain_elevation)
-                    biome = Biome::MOUNTAIN;
-                else
-                    biome = Biome::SAVANNA;
-                chunk.biome[idx] = biome;
+                chunk.biome[idx] = getBiome(chunk.elevation[idx], chunk.moisture[idx]);
                 idx++;
             }
         }
