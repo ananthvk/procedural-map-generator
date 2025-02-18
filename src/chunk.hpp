@@ -1,33 +1,9 @@
 #ifndef A_CHUNK_H
 #define A_CHUNK_H
 #include "confparse.hpp"
+#include "registries.hpp"
 #include <memory>
 #include <vector>
-
-// Whittaker classification
-// https://en.wikipedia.org/wiki/Biome
-enum class Biome
-{
-    // Terrestrial biomes
-    ICE_DESERT,
-    TUNDRA,
-    BOREAL_FOREST,
-    SHRUBLAND,
-    TEMPERATE_GRASSLAND,
-    TROPICAL_DESERT,
-    SAVANNA,
-    TEMPERATE_FOREST,
-    TEMPERATE_RAINFOREST,
-    TROPICAL_RAINFOREST,
-    MOUNTAIN,
-
-    // Aquatic biomes
-    BEACH,
-    LAKE,
-    RIVER,
-    SHALLOW_OCEAN,
-    DEEP_OCEAN,
-};
 
 struct Chunk
 {
@@ -36,7 +12,7 @@ struct Chunk
     int height;
     std::vector<float> elevation;
     std::vector<float> moisture;
-    std::vector<Biome> biome;
+    std::vector<int> biome;
 };
 
 enum class LayerType
@@ -56,7 +32,7 @@ class Layer
 class InPlaceLayer : public Layer
 {
   public:
-    virtual auto execute(Chunk &chunk) const -> void = 0;
+    virtual auto execute(Chunk &chunk, Registry &registry) const -> void = 0;
 
     auto type() const -> LayerType { return LayerType::INPLACE; }
 
@@ -66,7 +42,7 @@ class InPlaceLayer : public Layer
 class OutPlaceLayer : public Layer
 {
   public:
-    virtual auto execute(const Chunk &chunk) const -> Chunk = 0;
+    virtual auto execute(const Chunk &chunk, Registry &registry) const -> Chunk = 0;
 
     auto type() const -> LayerType { return LayerType::OUTPLACE; }
 
@@ -82,6 +58,6 @@ class ChunkFactory
 
     auto add_layer(std::unique_ptr<Layer> layer) -> void;
 
-    auto execute() const -> Chunk;
+    auto execute(Registry &registry) const -> Chunk;
 };
 #endif // A_CHUNK_H

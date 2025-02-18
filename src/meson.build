@@ -3,7 +3,9 @@ srcs = [
     'noise.cpp',
     'chunk.cpp',
     'chunk_renderer.cpp',
-    'engine.cpp'
+    'engine.cpp',
+    'registries.cpp',
+    'csscolorparser.cpp'
 ]
 
 executable(

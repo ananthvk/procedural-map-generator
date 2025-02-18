@@ -2,8 +2,9 @@
 
 using namespace logger;
 
-auto Engine::load_config(const std::string &config_path) -> void
+auto Engine::load_config() -> void
 {
+    std::string config_path = (data_folder_path / "config.txt").generic_string();
     auto new_cfg = parser.from_file(config_path);
     if (cfg == new_cfg)
     {
@@ -11,7 +12,6 @@ auto Engine::load_config(const std::string &config_path) -> void
         return;
     }
     cfg = new_cfg;
-    config_file_path = config_path;
     width = cfg.get("width").parse<int>();
     height = cfg.get("height").parse<int>();
     FPS = cfg.get("fps").parse<int>();
@@ -27,7 +27,8 @@ auto Engine::apply_config(bool is_update) -> void
         return;
     info("Applying new config since configuration changed...");
     factory.from_config(cfg);
-    renderer.from_config(cfg);
+    renderer.from_config(cfg, &registry);
+    registry.load(data_folder_path);
     SetTargetFPS(FPS);
     SetWindowSize(width, height);
     SetWindowTitle(title.c_str());
@@ -41,18 +42,18 @@ auto Engine::apply_config(bool is_update) -> void
         ToggleFullscreen();
         is_currently_in_fullscreen = false;
     }
-    chunk = factory.execute();
+    chunk = factory.execute(registry);
     if (is_update)
         renderer.update_texture(chunk_texture, chunk);
     else
         chunk_texture = renderer.generate_texture(chunk);
 }
 
-Engine::Engine(const std::string &config_file_path)
-    : is_currently_in_fullscreen(false), config_changed(true)
+Engine::Engine(const std::filesystem::path &data_folder_path)
+    : is_currently_in_fullscreen(false), data_folder_path(data_folder_path), config_changed(true)
 {
     info("Creating engine...");
-    load_config(config_file_path);
+    load_config();
 }
 
 auto Engine::run() -> void
@@ -81,7 +82,7 @@ auto Engine::run() -> void
 
         if (should_reload)
         {
-            load_config(config_file_path);
+            load_config();
             apply_config(true);
         }
 

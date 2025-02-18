@@ -1,16 +1,16 @@
 #include "engine.hpp"
-
+#include <filesystem>
 using namespace logger;
 
-#ifndef CONFIG_FILE_PATH
-const char *CONFIG_FILE_PATH = "config.txt";
+#ifndef DATA_FOLDER
+#define DATA_FOLDER "data"
 #endif
 
 auto main(int argc, char *argv[]) -> int
 {
     try
     {
-        Engine engine(CONFIG_FILE_PATH);
+        Engine engine(std::filesystem::path(DATA_FOLDER));
         engine.run();
     }
     catch (confparse::parse_error &e)

@@ -3,13 +3,13 @@
 #include "chunk.hpp"
 #include "chunk_renderer.hpp"
 #include "confparse.hpp"
+#include "engine.hpp"
 #include "logger.h"
 #include <raylib.h>
 #include <raymath.h>
 
 class Engine
 {
-    std::string config_file_path;
     confparse::ConfigParser parser;
     confparse::Config cfg;
 
@@ -20,18 +20,21 @@ class Engine
 
     int width, height, FPS, reload_interval;
     bool fullscreen;
-    bool is_currently_in_fullscreen;
     std::string title;
-    
+
+    bool is_currently_in_fullscreen;
+    std::filesystem::path data_folder_path;
     bool config_changed;
 
-    auto load_config(const std::string &config_path) -> void;
+    Registry registry;
+
+    auto load_config() -> void;
 
     auto apply_config(bool is_update) -> void;
 
 
   public:
-    Engine(const std::string &config_file_path);
+    Engine(const std::filesystem::path &data_folder_path);
 
     auto run() -> void;
 

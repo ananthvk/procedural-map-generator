@@ -1,0 +1,112 @@
+; This file defines biomes to be used by the generator
+; Note: This file uses ";" instead of "#" as comment character
+; To define a biome,
+; biomes = <biome_id_1> <biome_id_2> ....
+; Note: biome_id must not contain spaces
+
+; <biome_id>.name = <Biome name>
+; <biome_id>.color = <Map render color>
+; <biome_id>.elevation.start = <Elevation start value>
+; <biome_id>.elevation.end = <Elevation end value>
+; <biome_id>.moisture.start = <Moisture start value>
+; <biome_id>.moisture.end = <Moisture end value>
+
+biomes = deep_ocean shallow_ocean beach ice_desert tundra boreal_forest shrubland temperate_grassland tropical_desert savanna temperate_forest temperate_rainforest tropical_rainforest mountain
+
+deep_ocean.name            = Deep Ocean
+deep_ocean.color           = #001D3D
+deep_ocean.elevation.start = 0
+deep_ocean.elevation.end   = 0.3
+deep_ocean.moisture.start  = 0
+deep_ocean.moisture.end    = 1
+
+shallow_ocean.name            = Shallow Ocean
+shallow_ocean.color           = #1E90FF
+shallow_ocean.elevation.start = 0.3
+shallow_ocean.elevation.end   = 0.5
+shallow_ocean.moisture.start  = 0
+shallow_ocean.moisture.end    = 1
+
+beach.name                    = Beach
+beach.color                   = #F4E4A0
+beach.elevation.start         = 0.5
+beach.elevation.end           = 0.55
+beach.moisture.start          = 0
+beach.moisture.end            = 1
+
+ice_desert.name                = Ice Desert
+ice_desert.color               = #DDEEFF
+ice_desert.elevation.start     = 0.45
+ice_desert.elevation.end       = 1
+ice_desert.moisture.start      = 0
+ice_desert.moisture.end        = 0.3
+
+tundra.name                   = Tundra
+tundra.color                  = #A9C2A3
+tundra.elevation.start        = 0.45
+tundra.elevation.end          = 1
+tundra.moisture.start         = 0.1
+tundra.moisture.end           = 0.2
+
+boreal_forest.name            = Boreal Forest
+boreal_forest.color           = #405D27
+boreal_forest.elevation.start = 0.6
+boreal_forest.elevation.end   = 1
+boreal_forest.moisture.start  = 0.5
+boreal_forest.moisture.end    = 1
+
+shrubland.name                = Shrubland
+shrubland.color               = #78866B
+shrubland.elevation.start     = 0.5
+shrubland.elevation.end       = 1
+shrubland.moisture.start      = 0.3
+shrubland.moisture.end        = 0.6
+
+temperate_grassland.name       = Temperate Grassland
+temperate_grassland.color      = #404F3A
+temperate_grassland.elevation.start = 0.55
+temperate_grassland.elevation.end   = 1
+temperate_grassland.moisture.start  = 0.2
+temperate_grassland.moisture.end    = 0.6
+
+tropical_desert.name           = Tropical Desert
+tropical_desert.color          = #E3C16F
+tropical_desert.elevation.start = 0.45
+tropical_desert.elevation.end   = 1
+tropical_desert.moisture.start  = 0
+tropical_desert.moisture.end    = 0.2
+
+savanna.name                   = Savanna
+savanna.color                  = #C9B478
+savanna.elevation.start        = 0.5
+savanna.elevation.end          = 1
+savanna.moisture.start         = 0.2
+savanna.moisture.end           = 0.5
+
+temperate_forest.name          = Temperate Forest
+temperate_forest.color         = #4F7942
+temperate_forest.elevation.start = 0.5
+temperate_forest.elevation.end   = 1
+temperate_forest.moisture.start  = 0.5
+temperate_forest.moisture.end    = 0.9
+
+temperate_rainforest.name      = Temperate Rainforest
+temperate_rainforest.color     = #2E8B57
+temperate_rainforest.elevation.start = 0.5
+temperate_rainforest.elevation.end   = 1
+temperate_rainforest.moisture.start  = 0.7
+temperate_rainforest.moisture.end    = 1
+
+tropical_rainforest.name       = Tropical Rainforest
+tropical_rainforest.color      = #0B6623
+tropical_rainforest.elevation.start = 0.6
+tropical_rainforest.elevation.end   = 1
+tropical_rainforest.moisture.start  = 0.8
+tropical_rainforest.moisture.end    = 1
+
+mountain.name                  = Mountain
+mountain.color                 = #808080
+mountain.elevation.start       = 0.8
+mountain.elevation.end         = 1
+mountain.moisture.start        = 0
+mountain.moisture.end          = 1

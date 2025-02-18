@@ -11,14 +11,14 @@ class InitializationLayer : public InPlaceLayer
     {
     }
 
-    auto execute(Chunk &chunk) const -> void
+    auto execute(Chunk &chunk, Registry &registry) const -> void
     {
         chunk.width = width;
         chunk.height = height;
         chunk.master_seed = master_seed;
         chunk.elevation = std::vector<float>(width * height, 0.5f);
         chunk.moisture = std::vector<float>(width * height, 0.5f);
-        chunk.biome = std::vector<Biome>(width * height, Biome::TEMPERATE_GRASSLAND);
+        chunk.biome = std::vector<int>(width * height, -1);
     }
 };
 
@@ -45,7 +45,7 @@ class TerrainGenerationLayer : public InPlaceLayer
         amplitude4 = cfg.get("terrain.amplitude4").parse<float>();
     }
 
-    auto execute(Chunk &chunk) const -> void
+    auto execute(Chunk &chunk, Registry &registry) const -> void
     {
         static NoiseGenerator generator1;
         static NoiseGenerator generator2;
@@ -110,7 +110,7 @@ class MoistureGenerationLayer : public InPlaceLayer
         amplitude4 = cfg.get("moisture.amplitude4").parse<float>();
     }
 
-    auto execute(Chunk &chunk) const -> void
+    auto execute(Chunk &chunk, Registry &registry) const -> void
     {
         static NoiseGenerator generator1;
         static NoiseGenerator generator2;
@@ -152,88 +152,21 @@ class MoistureGenerationLayer : public InPlaceLayer
     }
 };
 
-Biome getBiome(float e, float m)
-{
-    if (e < 0.35)
-        return Biome::SHALLOW_OCEAN;
-    if (e < 0.38)
-        return Biome::BEACH;
-
-    if (e > 0.8)
-    {
-        if (m < 0.5)
-            return Biome::TUNDRA;
-        return Biome::ICE_DESERT;
-    }
-
-    if (e > 0.6)
-    {
-        if (m < 0.66)
-            return Biome::SHRUBLAND;
-        return Biome::BOREAL_FOREST;
-    }
-
-    if (e > 0.3)
-    {
-        if (m < 0.50)
-            return Biome::TEMPERATE_GRASSLAND;
-        return Biome::TEMPERATE_RAINFOREST;
-    }
-
-    if (m < 0.16)
-        return Biome::TROPICAL_DESERT;
-    if (m < 0.33)
-        return Biome::SAVANNA;
-    if (m < 0.66)
-        return Biome::TROPICAL_RAINFOREST;
-    return Biome::TROPICAL_RAINFOREST;
-}
-
 class BiomeCreationLayer : public InPlaceLayer
 {
-    float beach_elevation;
-    float shallow_ocean_elevation;
-    float deep_ocean_elevation;
-    float ice_desert_elevation;
-    float tundra_elevation;
-    float boreal_forest_elevation;
-    float shrubland_elevation;
-    float temperate_grassland_elevation;
-    float tropical_desert_elevation;
-    float savanna_elevation;
-    float temperate_forest_elevation;
-    float temperate_rainforest_elevation;
-    float tropical_rainforest_elevation;
-    float mountain_elevation;
 
   public:
-    BiomeCreationLayer(const confparse::Config &cfg)
-    {
-        beach_elevation = cfg.get("beach_elevation").parse<float>();
-        shallow_ocean_elevation = cfg.get("shallow_ocean_elevation").parse<float>();
-        deep_ocean_elevation = cfg.get("deep_ocean_elevation").parse<float>();
-        ice_desert_elevation = cfg.get("ice_desert_elevation").parse<float>();
-        tundra_elevation = cfg.get("tundra_elevation").parse<float>();
-        boreal_forest_elevation = cfg.get("boreal_forest_elevation").parse<float>();
-        shrubland_elevation = cfg.get("shrubland_elevation").parse<float>();
-        temperate_grassland_elevation = cfg.get("temperate_grassland_elevation").parse<float>();
-        tropical_desert_elevation = cfg.get("tropical_desert_elevation").parse<float>();
-        savanna_elevation = cfg.get("savanna_elevation").parse<float>();
-        temperate_forest_elevation = cfg.get("temperate_forest_elevation").parse<float>();
-        temperate_rainforest_elevation = cfg.get("temperate_rainforest_elevation").parse<float>();
-        tropical_rainforest_elevation = cfg.get("tropical_rainforest_elevation").parse<float>();
-        mountain_elevation = cfg.get("mountain_elevation").parse<float>();
-    }
+    BiomeCreationLayer(const confparse::Config &cfg) {}
 
-    auto execute(Chunk &chunk) const -> void
+    auto execute(Chunk &chunk, Registry &registry) const -> void
     {
         int idx = 0;
         for (int y = 0; y < chunk.height; ++y)
         {
             for (int x = 0; x < chunk.width; ++x)
             {
-                float elevation = chunk.elevation[idx];
-                chunk.biome[idx] = getBiome(chunk.elevation[idx], chunk.moisture[idx]);
+                chunk.biome[idx] = registry.biome_registry.get_biome_within_range(
+                    chunk.moisture[idx], chunk.elevation[idx]);
                 idx++;
             }
         }
@@ -259,15 +192,15 @@ auto ChunkFactory::from_config(const confparse::Config &cfg) -> void
     layers.push_back(std::make_unique<BiomeCreationLayer>(cfg));
 }
 
-auto ChunkFactory::execute() const -> Chunk
+auto ChunkFactory::execute(Registry &registry) const -> Chunk
 {
     Chunk chunk;
     for (const auto &layer : layers)
     {
         if (layer->type() == LayerType::INPLACE)
-            static_cast<InPlaceLayer *>(layer.get())->execute(chunk);
+            static_cast<InPlaceLayer *>(layer.get())->execute(chunk, registry);
         else
-            chunk = static_cast<OutPlaceLayer *>(layer.get())->execute(chunk);
+            chunk = static_cast<OutPlaceLayer *>(layer.get())->execute(chunk, registry);
     }
     return chunk;
 }

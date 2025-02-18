@@ -70,9 +70,10 @@ auto ChunkRenderer2D::update_texture(ChunkTexture2D &texture, const Chunk &chunk
     UpdateTexture(texture.texture, texture.pixels);
 }
 
-auto ChunkRenderer2D::from_config(const confparse::Config &cfg) -> void
+auto ChunkRenderer2D::from_config(const confparse::Config &cfg, Registry *registry) -> void
 {
     auto render_type = cfg.get("render_type").as_string();
+    this->registry = registry;
     if (render_type == "elevation_heightmap")
     {
         current_render_mode = RenderMode::ELEVATION_HEIGHTMAP;
@@ -95,29 +96,12 @@ auto ChunkRenderer2D::get_color(const Chunk &chunk, int idx) const -> Color
 {
     if (current_render_mode == RenderMode::BIOME_MAP)
     {
-        auto biome = chunk.biome[idx];
-        if (biome == Biome::SHALLOW_OCEAN)
-            return {78, 98, 159, 255};
-        if (biome == Biome::BEACH)
-            return {208, 181, 138, 255};
-        if (biome == Biome::TUNDRA)
-            return {196, 213, 227, 255};
-        if (biome == Biome::ICE_DESERT)
-            return {194, 240, 255, 255};
-        if (biome == Biome::SHRUBLAND)
-            return {57, 76, 56, 255};
-        if (biome == Biome::BOREAL_FOREST)
-            return {45, 67, 49, 255};
-        if (biome == Biome::TEMPERATE_GRASSLAND)
-            return {106, 137, 61, 255};
-        if (biome == Biome::TEMPERATE_RAINFOREST)
-            return {37, 50, 56, 255};
-        if (biome == Biome::TROPICAL_DESERT)
-            return {255, 204, 82, 255};
-        if (biome == Biome::SAVANNA)
-            return {208, 176, 97, 255};
-        if (biome == Biome::TROPICAL_RAINFOREST)
-            return {38, 81, 32, 255};
+        int biome = chunk.biome[idx];
+        // TODO: Return a default color
+        if (biome == -1)
+            return {0, 0, 0, 255};
+        auto color = registry->biome_registry.get(biome).render_color;
+        return {color.r, color.g, color.b, static_cast<unsigned char>(color.a * 255)};
     }
     else if (current_render_mode == RenderMode::ELEVATION_HEIGHTMAP)
     {
@@ -129,4 +113,5 @@ auto ChunkRenderer2D::get_color(const Chunk &chunk, int idx) const -> Color
         unsigned char value = static_cast<unsigned char>(chunk.moisture[idx] * 255);
         return {value, value, value, 255};
     }
+    return {0, 0, 0, 255};
 }

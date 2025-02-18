@@ -99,7 +99,7 @@ class ValueType
         if ((!(iss >> parsed_val)) || !(iss.eof()))
         {
             // If the value could not be parsed, or if there are some more characters
-            throw parse_error("Parse error: Invalid literal during parse()\n    | " + val);
+            throw parse_error("Parse error: Invalid literal during parse()\n    | \"" + val + std::string("\""));
         }
         return parsed_val;
     }
