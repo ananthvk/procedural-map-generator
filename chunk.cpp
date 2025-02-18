@@ -17,6 +17,7 @@ class InitializationLayer : public InPlaceLayer
         chunk.height = height;
         chunk.master_seed = master_seed;
         chunk.elevation = std::vector<float>(width * height, 0.5f);
+        chunk.moisture = std::vector<float>(width * height, 0.5f);
         chunk.biome = std::vector<Biome>(width * height, Biome::TEMPERATE_GRASSLAND);
     }
 };
@@ -29,19 +30,19 @@ class TerrainGenerationLayer : public InPlaceLayer
   public:
     TerrainGenerationLayer(const confparse::Config &cfg)
     {
-        map_scale = cfg.get("scale").parse<float>();
-        redistribution = cfg.get("redistribution").try_parse<float>(1.0f);
-        fudge = cfg.get("fudge").parse<float>();
+        map_scale = cfg.get("terrain.scale").parse<float>();
+        redistribution = cfg.get("terrain.redistribution").try_parse<float>(1.0f);
+        fudge = cfg.get("terrain.fudge").parse<float>();
 
-        frequency1 = cfg.get("frequency1").parse<float>();
-        frequency2 = cfg.get("frequency2").parse<float>();
-        frequency3 = cfg.get("frequency3").parse<float>();
-        frequency4 = cfg.get("frequency4").parse<float>();
+        frequency1 = cfg.get("terrain.frequency1").parse<float>();
+        frequency2 = cfg.get("terrain.frequency2").parse<float>();
+        frequency3 = cfg.get("terrain.frequency3").parse<float>();
+        frequency4 = cfg.get("terrain.frequency4").parse<float>();
 
-        amplitude1 = cfg.get("amplitude1").parse<float>();
-        amplitude2 = cfg.get("amplitude2").parse<float>();
-        amplitude3 = cfg.get("amplitude3").parse<float>();
-        amplitude4 = cfg.get("amplitude4").parse<float>();
+        amplitude1 = cfg.get("terrain.amplitude1").parse<float>();
+        amplitude2 = cfg.get("terrain.amplitude2").parse<float>();
+        amplitude3 = cfg.get("terrain.amplitude3").parse<float>();
+        amplitude4 = cfg.get("terrain.amplitude4").parse<float>();
     }
 
     auto execute(Chunk &chunk) const -> void
@@ -52,10 +53,10 @@ class TerrainGenerationLayer : public InPlaceLayer
         static NoiseGenerator generator4;
         // Modify the noise generator seeds slightly
 
-        generator1.set_seed(chunk.master_seed + 2025);
-        generator2.set_seed(chunk.master_seed + 1337);
-        generator3.set_seed(chunk.master_seed + 4040);
-        generator4.set_seed(chunk.master_seed + 3891);
+        generator1.set_seed(chunk.master_seed + 7158);
+        generator2.set_seed(chunk.master_seed + 9821);
+        generator3.set_seed(chunk.master_seed + 1356);
+        generator4.set_seed(chunk.master_seed + 3495);
 
         int idx = 0;
 
@@ -81,6 +82,71 @@ class TerrainGenerationLayer : public InPlaceLayer
                 elevation = elevation / (amplitude1 + amplitude2 + amplitude3 + amplitude4);
                 elevation = std::powf(elevation * fudge, redistribution);
                 chunk.elevation[idx++] = elevation;
+            }
+        }
+    }
+};
+
+class MoistureGenerationLayer : public InPlaceLayer
+{
+    float map_scale, redistribution, fudge, frequency1, frequency2, frequency3, frequency4,
+        amplitude1, amplitude2, amplitude3, amplitude4;
+
+  public:
+    MoistureGenerationLayer(const confparse::Config &cfg)
+    {
+        map_scale = cfg.get("moisture.scale").parse<float>();
+        redistribution = cfg.get("moisture.redistribution").try_parse<float>(1.0f);
+        fudge = cfg.get("moisture.fudge").parse<float>();
+
+        frequency1 = cfg.get("moisture.frequency1").parse<float>();
+        frequency2 = cfg.get("moisture.frequency2").parse<float>();
+        frequency3 = cfg.get("moisture.frequency3").parse<float>();
+        frequency4 = cfg.get("moisture.frequency4").parse<float>();
+
+        amplitude1 = cfg.get("moisture.amplitude1").parse<float>();
+        amplitude2 = cfg.get("moisture.amplitude2").parse<float>();
+        amplitude3 = cfg.get("moisture.amplitude3").parse<float>();
+        amplitude4 = cfg.get("moisture.amplitude4").parse<float>();
+    }
+
+    auto execute(Chunk &chunk) const -> void
+    {
+        static NoiseGenerator generator1;
+        static NoiseGenerator generator2;
+        static NoiseGenerator generator3;
+        static NoiseGenerator generator4;
+        // Modify the noise generator seeds slightly
+
+        generator1.set_seed(chunk.master_seed + 2025);
+        generator2.set_seed(chunk.master_seed + 1337);
+        generator3.set_seed(chunk.master_seed + 4040);
+        generator4.set_seed(chunk.master_seed + 3891);
+
+        int idx = 0;
+
+        for (int y = 0; y < chunk.height; ++y)
+        {
+            for (int x = 0; x < chunk.width; ++x)
+            {
+                float nx = static_cast<float>(x) / chunk.width - 0.5;
+                float ny = static_cast<float>(y) / chunk.height - 0.5;
+
+                float moisture = amplitude1 * generator1.at(frequency1 * map_scale * nx,
+                                                             frequency1 * map_scale * ny);
+
+                moisture += amplitude2 * generator2.at(frequency2 * map_scale * nx,
+                                                        frequency2 * map_scale * ny);
+
+                moisture += amplitude3 * generator3.at(frequency3 * map_scale * nx,
+                                                        frequency3 * map_scale * ny);
+
+                moisture += amplitude4 * generator4.at(frequency4 * map_scale * nx,
+                                                        frequency4 * map_scale * ny);
+
+                moisture = moisture / (amplitude1 + amplitude2 + amplitude3 + amplitude4);
+                moisture = std::powf(moisture * fudge, redistribution);
+                chunk.moisture[idx++] = moisture;
             }
         }
     }
@@ -121,6 +187,7 @@ class BiomeCreationLayer : public InPlaceLayer
                     biome = Biome::SHALLOW_OCEAN;
                 else if (elevation < beach_elevation)
                     biome = Biome::BEACH;
+
                 else if (elevation < grassland_elevation)
                     biome = Biome::TEMPERATE_GRASSLAND;
                 else if (elevation < rockland_elevation)
@@ -151,6 +218,7 @@ auto ChunkFactory::from_config(const confparse::Config &cfg) -> void
 
     layers.push_back(std::make_unique<InitializationLayer>(width, height, master_seed));
     layers.push_back(std::make_unique<TerrainGenerationLayer>(cfg));
+    layers.push_back(std::make_unique<MoistureGenerationLayer>(cfg));
     layers.push_back(std::make_unique<BiomeCreationLayer>(cfg));
 }
 

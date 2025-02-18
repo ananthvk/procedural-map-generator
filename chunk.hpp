@@ -35,6 +35,7 @@ struct Chunk
     int master_seed;
     int height;
     std::vector<float> elevation;
+    std::vector<float> moisture;
     std::vector<Biome> biome;
 };
 

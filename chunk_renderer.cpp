@@ -116,5 +116,10 @@ auto ChunkRenderer2D::get_color(const Chunk &chunk, int idx) const -> Color
         unsigned char value = static_cast<unsigned char>(chunk.elevation[idx] * 255);
         return {value, value, value, 255};
     }
+    else if (current_render_mode == RenderMode::MOISTURE_HEIGHTMAP)
+    {
+        unsigned char value = static_cast<unsigned char>(chunk.moisture[idx] * 255);
+        return {value, value, value, 255};
+    }
 
 }
