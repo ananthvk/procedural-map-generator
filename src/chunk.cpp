@@ -1,6 +1,9 @@
 #include "chunk.hpp"
 #include "noise.hpp"
 
+#define TERRAIN_SEED_MAGIC_NUMBER 8021
+#define MOISTURE_SEED_MAGIC_NUMBER 4712
+
 class InitializationLayer : public InPlaceLayer
 {
     int width, height, master_seed;
@@ -44,134 +47,74 @@ class InitializationLayer : public InPlaceLayer
 
 class TerrainGenerationLayer : public InPlaceLayer
 {
-    float map_scale, redistribution, fudge, frequency1, frequency2, frequency3, frequency4,
-        amplitude1, amplitude2, amplitude3, amplitude4, global_map_scale;
+    NoiseMap noisemap;
+    float map_scale;
 
   public:
     TerrainGenerationLayer(const confparse::Config &cfg)
     {
-        global_map_scale = cfg.get("global_map_scale").parse<float>();
+        auto global_map_scale = cfg.get("global_map_scale").parse<float>();
         map_scale = cfg.get("terrain.scale").parse<float>() * global_map_scale;
-        redistribution = cfg.get("terrain.redistribution").try_parse<float>(1.0f);
-        fudge = cfg.get("terrain.fudge").parse<float>();
+        auto redistribution = cfg.get("terrain.redistribution").try_parse<float>(1.0f);
+        auto fudge = cfg.get("terrain.fudge").parse<float>();
+        auto octaves = cfg.get("terrain.octaves").parse<int>();
+        auto seed = cfg.get("seed").parse<int>() + TERRAIN_SEED_MAGIC_NUMBER;
 
-        frequency1 = cfg.get("terrain.frequency1").parse<float>();
-        frequency2 = cfg.get("terrain.frequency2").parse<float>();
-        frequency3 = cfg.get("terrain.frequency3").parse<float>();
-        frequency4 = cfg.get("terrain.frequency4").parse<float>();
+        std::vector<float> frequencies;
+        std::vector<float> amplitudes;
 
-        amplitude1 = cfg.get("terrain.amplitude1").parse<float>();
-        amplitude2 = cfg.get("terrain.amplitude2").parse<float>();
-        amplitude3 = cfg.get("terrain.amplitude3").parse<float>();
-        amplitude4 = cfg.get("terrain.amplitude4").parse<float>();
+        for (int i = 1; i <= octaves; ++i)
+        {
+            auto frequency = cfg.get("terrain.frequency" + std::to_string(i)).parse<float>();
+            auto amplitude = cfg.get("terrain.amplitude" + std::to_string(i)).parse<float>();
+            frequencies.push_back(frequency);
+            amplitudes.push_back(amplitude);
+        }
+        NoiseGenerator base_generator{seed};
+        noisemap = NoiseMap(frequencies, amplitudes, base_generator, fudge, redistribution);
     }
 
     auto execute(Chunk &chunk, Registry &registry) const -> void
     {
-        static NoiseGenerator generator1;
-        static NoiseGenerator generator2;
-        static NoiseGenerator generator3;
-        static NoiseGenerator generator4;
-        // Modify the noise generator seeds slightly
-
-        generator1.set_seed(chunk.master_seed + 7158);
-        generator2.set_seed(chunk.master_seed + 9821);
-        generator3.set_seed(chunk.master_seed + 1356);
-        generator4.set_seed(chunk.master_seed + 3495);
-
-        int idx = 0;
-
-        for (int y = 0; y < chunk.height; ++y)
-        {
-            for (int x = 0; x < chunk.width; ++x)
-            {
-                float nx = chunk.x + static_cast<float>(x) / chunk.width - 0.5;
-                float ny = chunk.y + static_cast<float>(y) / chunk.height - 0.5;
-
-                float elevation = amplitude1 * generator1.at((frequency1 * map_scale * nx),
-                                                             (frequency1 * map_scale * ny));
-
-                elevation += amplitude2 * generator2.at((frequency2 * map_scale * nx),
-                                                        (frequency2 * map_scale * ny));
-
-                elevation += amplitude3 * generator3.at((frequency3 * map_scale * nx),
-                                                        (frequency3 * map_scale * ny));
-
-                elevation += amplitude4 * generator4.at((frequency4 * map_scale * nx),
-                                                        (frequency4 * map_scale * ny));
-
-                elevation = elevation / (amplitude1 + amplitude2 + amplitude3 + amplitude4);
-                elevation = std::powf(elevation * fudge, redistribution);
-                chunk.elevation[idx++] = elevation;
-            }
-        }
+        noisemap.create_noise_map(chunk.x, chunk.y, chunk.width, chunk.height, map_scale,
+                                  chunk.elevation);
     }
 };
 
 class MoistureGenerationLayer : public InPlaceLayer
 {
-    float map_scale, redistribution, fudge, frequency1, frequency2, frequency3, frequency4,
-        amplitude1, amplitude2, amplitude3, amplitude4;
-    float global_map_scale;
+    NoiseMap noisemap;
+    float map_scale;
 
   public:
     MoistureGenerationLayer(const confparse::Config &cfg)
     {
-        global_map_scale = cfg.get("global_map_scale").parse<float>();
+        auto global_map_scale = cfg.get("global_map_scale").parse<float>();
         map_scale = cfg.get("moisture.scale").parse<float>() * global_map_scale;
-        redistribution = cfg.get("moisture.redistribution").try_parse<float>(1.0f);
-        fudge = cfg.get("moisture.fudge").parse<float>();
+        auto redistribution = cfg.get("moisture.redistribution").try_parse<float>(1.0f);
+        auto fudge = cfg.get("moisture.fudge").parse<float>();
+        auto octaves = cfg.get("moisture.octaves").parse<int>();
+        auto seed = cfg.get("seed").parse<int>() + MOISTURE_SEED_MAGIC_NUMBER;
 
-        frequency1 = cfg.get("moisture.frequency1").parse<float>();
-        frequency2 = cfg.get("moisture.frequency2").parse<float>();
-        frequency3 = cfg.get("moisture.frequency3").parse<float>();
-        frequency4 = cfg.get("moisture.frequency4").parse<float>();
+        std::vector<float> frequencies;
+        std::vector<float> amplitudes;
 
-        amplitude1 = cfg.get("moisture.amplitude1").parse<float>();
-        amplitude2 = cfg.get("moisture.amplitude2").parse<float>();
-        amplitude3 = cfg.get("moisture.amplitude3").parse<float>();
-        amplitude4 = cfg.get("moisture.amplitude4").parse<float>();
+        for (int i = 1; i <= octaves; ++i)
+        {
+            auto frequency = cfg.get("moisture.frequency" + std::to_string(i)).parse<float>();
+            auto amplitude = cfg.get("moisture.amplitude" + std::to_string(i)).parse<float>();
+            frequencies.push_back(frequency);
+            amplitudes.push_back(amplitude);
+        }
+
+        NoiseGenerator base_generator{seed};
+        noisemap = NoiseMap(frequencies, amplitudes, base_generator, fudge, redistribution);
     }
 
     auto execute(Chunk &chunk, Registry &registry) const -> void
     {
-        static NoiseGenerator generator1;
-        static NoiseGenerator generator2;
-        static NoiseGenerator generator3;
-        static NoiseGenerator generator4;
-        // Modify the noise generator seeds slightly
-
-        generator1.set_seed(chunk.master_seed + 2025);
-        generator2.set_seed(chunk.master_seed + 1337);
-        generator3.set_seed(chunk.master_seed + 4040);
-        generator4.set_seed(chunk.master_seed + 3891);
-
-        int idx = 0;
-
-        for (int y = 0; y < chunk.height; ++y)
-        {
-            for (int x = 0; x < chunk.width; ++x)
-            {
-                float nx = chunk.x + static_cast<float>(x) / chunk.width - 0.5;
-                float ny = chunk.y + static_cast<float>(y) / chunk.height - 0.5;
-
-                float moisture = amplitude1 * generator1.at((frequency1 * map_scale * nx),
-                                                            (frequency1 * map_scale * ny));
-
-                moisture += amplitude2 * generator2.at((frequency2 * map_scale * nx),
-                                                       (frequency2 * map_scale * ny));
-
-                moisture += amplitude3 * generator3.at((frequency3 * map_scale * nx),
-                                                       (frequency3 * map_scale * ny));
-
-                moisture += amplitude4 * generator4.at((frequency4 * map_scale * nx),
-                                                       (frequency4 * map_scale * ny));
-
-                moisture = moisture / (amplitude1 + amplitude2 + amplitude3 + amplitude4);
-                moisture = std::powf(moisture * fudge, redistribution);
-                chunk.moisture[idx++] = moisture;
-            }
-        }
+        noisemap.create_noise_map(chunk.x, chunk.y, chunk.width, chunk.height, map_scale,
+                                  chunk.moisture);
     }
 };
 
