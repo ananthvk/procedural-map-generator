@@ -35,7 +35,7 @@ else
     extra_args = []
 endif
 
-add_project_arguments('-DDATA_FOLDER="../data"', language: 'cpp')
+add_project_arguments('-DDATA_FOLDER="data"', language: 'cpp')
 include_dirs = include_directories(['include'])
 raylib = dependency('raylib')
 fmt = dependency('fmt')

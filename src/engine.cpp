@@ -146,7 +146,7 @@ auto Engine::draw() -> void
         }
     }
     DrawFPS(20, 20);
-    DrawCircle(400, 400, 20, YELLOW);
+    //DrawCircle(400, 400, 20, YELLOW);
     EndDrawing();
 }
 

@@ -2,15 +2,15 @@
 # ============================== 
 title = Map Generator
 fps = 60
-width = 1920
-height = 1080
+width = 800
+height = 800
 fullscreen = false
 
 # In seconds, during development how often to reload from file
 reload_interval = 0.5
 
 # Master seed
-seed = 813
+seed = 8322
 
 # Global map scale
 global_map_scale = 0.5
