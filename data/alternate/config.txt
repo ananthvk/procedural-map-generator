@@ -1,0 +1,71 @@
+# General settings
+# ============================== 
+title = Map Generator
+fps = 60
+width = 800
+height = 800
+fullscreen = false
+
+# In seconds, during development how often to reload from file
+reload_interval = 0.5
+
+# Master seed
+seed = 6441
+
+# Global map scale
+global_map_scale = 0.5
+chunk_side_length = 128
+
+# Terrain generation settings
+# ============================== 
+terrain.scale = 60
+terrain.octaves = 8
+terrain.redistribution = 1.1
+terrain.fudge = 1.1
+
+terrain.frequency1 = 0.5 
+terrain.frequency2 = 2
+terrain.frequency3 = 5
+terrain.frequency4 = 12
+terrain.frequency5 = 21
+terrain.frequency6 = 33
+terrain.frequency7 = 72
+terrain.frequency8 = 128
+
+terrain.amplitude1 = 1
+terrain.amplitude2 = 0.5
+terrain.amplitude3 = 0.25
+terrain.amplitude4 = 0.125
+terrain.amplitude5 = 0.0625
+terrain.amplitude6 = 0.03125
+terrain.amplitude7 = 0.015625
+terrain.amplitude8 = 0.0078125
+
+
+# Moisture settings
+# ===========================
+moisture.scale = 60
+moisture.octaves = 4
+moisture.redistribution =  1.15
+moisture.fudge = 1.1
+moisture.frequency1 = 1
+moisture.frequency2 = 4
+moisture.frequency3 = 19
+moisture.frequency4 = 64
+moisture.amplitude1 = 1
+moisture.amplitude2 = 0.5
+moisture.amplitude3 = 0.125
+moisture.amplitude4 = 0.0120
+
+
+# Biome settings
+# ============================== 
+# Please look at "biomes.txt"
+
+
+# Renderer settings
+# ============================== 
+# Can be one of the following: "biome_map", "elevation_heightmap", "moisture_heightmap"
+render_type = biome_map
+#render_type = moisture_heightmap
+#render_type = elevation_heightmap
