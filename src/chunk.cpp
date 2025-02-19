@@ -16,21 +16,42 @@ class InitializationLayer : public InPlaceLayer
         chunk.width = width;
         chunk.height = height;
         chunk.master_seed = master_seed;
-        chunk.elevation = std::vector<float>(width * height, 0.5f);
-        chunk.moisture = std::vector<float>(width * height, 0.5f);
-        chunk.biome = std::vector<int>(width * height, -1);
+        if (chunk.elevation.size() == static_cast<size_t>(width * height))
+        {
+            for (auto &e : chunk.elevation)
+                e = 0.5f;
+        }
+        else
+            chunk.elevation = std::vector<float>(width * height, 0.5f);
+
+        if (chunk.moisture.size() == static_cast<size_t>(width * height))
+        {
+            for (auto &m : chunk.moisture)
+                m = 0.5f;
+        }
+        else
+            chunk.moisture = std::vector<float>(width * height, 0.5f);
+
+        if (chunk.biome.size() == static_cast<size_t>(width * height))
+        {
+            for (auto &b : chunk.biome)
+                b = -1;
+        }
+        else
+            chunk.biome = std::vector<int>(width * height, -1);
     }
 };
 
 class TerrainGenerationLayer : public InPlaceLayer
 {
     float map_scale, redistribution, fudge, frequency1, frequency2, frequency3, frequency4,
-        amplitude1, amplitude2, amplitude3, amplitude4;
+        amplitude1, amplitude2, amplitude3, amplitude4, global_map_scale;
 
   public:
     TerrainGenerationLayer(const confparse::Config &cfg)
     {
-        map_scale = cfg.get("terrain.scale").parse<float>();
+        global_map_scale = cfg.get("global_map_scale").parse<float>();
+        map_scale = cfg.get("terrain.scale").parse<float>() * global_map_scale;
         redistribution = cfg.get("terrain.redistribution").try_parse<float>(1.0f);
         fudge = cfg.get("terrain.fudge").parse<float>();
 
@@ -64,20 +85,20 @@ class TerrainGenerationLayer : public InPlaceLayer
         {
             for (int x = 0; x < chunk.width; ++x)
             {
-                float nx = static_cast<float>(x) / chunk.width - 0.5;
-                float ny = static_cast<float>(y) / chunk.height - 0.5;
+                float nx = chunk.x + static_cast<float>(x) / chunk.width - 0.5;
+                float ny = chunk.y + static_cast<float>(y) / chunk.height - 0.5;
 
-                float elevation = amplitude1 * generator1.at(frequency1 * map_scale * nx,
-                                                             frequency1 * map_scale * ny);
+                float elevation = amplitude1 * generator1.at((frequency1 * map_scale * nx),
+                                                             (frequency1 * map_scale * ny));
 
-                elevation += amplitude2 * generator2.at(frequency2 * map_scale * nx,
-                                                        frequency2 * map_scale * ny);
+                elevation += amplitude2 * generator2.at((frequency2 * map_scale * nx),
+                                                        (frequency2 * map_scale * ny));
 
-                elevation += amplitude3 * generator3.at(frequency3 * map_scale * nx,
-                                                        frequency3 * map_scale * ny);
+                elevation += amplitude3 * generator3.at((frequency3 * map_scale * nx),
+                                                        (frequency3 * map_scale * ny));
 
-                elevation += amplitude4 * generator4.at(frequency4 * map_scale * nx,
-                                                        frequency4 * map_scale * ny);
+                elevation += amplitude4 * generator4.at((frequency4 * map_scale * nx),
+                                                        (frequency4 * map_scale * ny));
 
                 elevation = elevation / (amplitude1 + amplitude2 + amplitude3 + amplitude4);
                 elevation = std::powf(elevation * fudge, redistribution);
@@ -91,11 +112,13 @@ class MoistureGenerationLayer : public InPlaceLayer
 {
     float map_scale, redistribution, fudge, frequency1, frequency2, frequency3, frequency4,
         amplitude1, amplitude2, amplitude3, amplitude4;
+    float global_map_scale;
 
   public:
     MoistureGenerationLayer(const confparse::Config &cfg)
     {
-        map_scale = cfg.get("moisture.scale").parse<float>();
+        global_map_scale = cfg.get("global_map_scale").parse<float>();
+        map_scale = cfg.get("moisture.scale").parse<float>() * global_map_scale;
         redistribution = cfg.get("moisture.redistribution").try_parse<float>(1.0f);
         fudge = cfg.get("moisture.fudge").parse<float>();
 
@@ -129,20 +152,20 @@ class MoistureGenerationLayer : public InPlaceLayer
         {
             for (int x = 0; x < chunk.width; ++x)
             {
-                float nx = static_cast<float>(x) / chunk.width - 0.5;
-                float ny = static_cast<float>(y) / chunk.height - 0.5;
+                float nx = chunk.x + static_cast<float>(x) / chunk.width - 0.5;
+                float ny = chunk.y + static_cast<float>(y) / chunk.height - 0.5;
 
-                float moisture = amplitude1 * generator1.at(frequency1 * map_scale * nx,
-                                                            frequency1 * map_scale * ny);
+                float moisture = amplitude1 * generator1.at((frequency1 * map_scale * nx),
+                                                            (frequency1 * map_scale * ny));
 
-                moisture += amplitude2 *
-                            generator2.at(frequency2 * map_scale * nx, frequency2 * map_scale * ny);
+                moisture += amplitude2 * generator2.at((frequency2 * map_scale * nx),
+                                                       (frequency2 * map_scale * ny));
 
-                moisture += amplitude3 *
-                            generator3.at(frequency3 * map_scale * nx, frequency3 * map_scale * ny);
+                moisture += amplitude3 * generator3.at((frequency3 * map_scale * nx),
+                                                       (frequency3 * map_scale * ny));
 
-                moisture += amplitude4 *
-                            generator4.at(frequency4 * map_scale * nx, frequency4 * map_scale * ny);
+                moisture += amplitude4 * generator4.at((frequency4 * map_scale * nx),
+                                                       (frequency4 * map_scale * ny));
 
                 moisture = moisture / (amplitude1 + amplitude2 + amplitude3 + amplitude4);
                 moisture = std::powf(moisture * fudge, redistribution);
@@ -182,8 +205,8 @@ auto ChunkFactory::from_config(const confparse::Config &cfg) -> void
 {
     layers.clear();
 
-    int width = cfg.get("width").parse<int>();
-    int height = cfg.get("width").parse<int>();
+    int width = cfg.get("chunk_side_length").parse<int>();
+    int height = cfg.get("chunk_side_length").parse<int>();
     int master_seed = cfg.get("seed").parse<int>();
 
     layers.push_back(std::make_unique<InitializationLayer>(width, height, master_seed));
@@ -192,9 +215,12 @@ auto ChunkFactory::from_config(const confparse::Config &cfg) -> void
     layers.push_back(std::make_unique<BiomeCreationLayer>(cfg));
 }
 
-auto ChunkFactory::execute(Registry &registry) const -> Chunk
+auto ChunkFactory::execute(Registry &registry, int chunk_x, int chunk_y) const -> Chunk
 {
     Chunk chunk;
+    chunk.x = chunk_x;
+    chunk.y = chunk_y;
+    logger::info("Creating chunk [{}, {}]", chunk_x, chunk_y);
     for (const auto &layer : layers)
     {
         if (layer->type() == LayerType::INPLACE)
@@ -203,4 +229,19 @@ auto ChunkFactory::execute(Registry &registry) const -> Chunk
             chunk = static_cast<OutPlaceLayer *>(layer.get())->execute(chunk, registry);
     }
     return chunk;
+}
+
+auto ChunkFactory::execute_update(Registry &registry, int chunk_x, int chunk_y, Chunk &chunk) const
+    -> void
+{
+    chunk.x = chunk_x;
+    chunk.y = chunk_y;
+    logger::info("Updating chunk [{}, {}]", chunk_x, chunk_y);
+    for (const auto &layer : layers)
+    {
+        if (layer->type() == LayerType::INPLACE)
+            static_cast<InPlaceLayer *>(layer.get())->execute(chunk, registry);
+        else
+            chunk = static_cast<OutPlaceLayer *>(layer.get())->execute(chunk, registry);
+    }
 }

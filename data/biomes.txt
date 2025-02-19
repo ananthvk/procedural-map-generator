@@ -30,7 +30,7 @@ shallow_ocean.moisture.end    = 1
 beach.name                    = Beach
 beach.color                   = #F4E4A0
 beach.elevation.start         = 0.5
-beach.elevation.end           = 0.55
+beach.elevation.end           = 0.53
 beach.moisture.start          = 0
 beach.moisture.end            = 1
 

@@ -10,6 +10,10 @@ struct Chunk
     int width;
     int master_seed;
     int height;
+    // Chunk coordinate or offset, identifies a chunk uniquely
+    // The top left chunk is (0,0) then (0,1) and so on
+    int x;
+    int y;
     std::vector<float> elevation;
     std::vector<float> moisture;
     std::vector<int> biome;
@@ -58,6 +62,8 @@ class ChunkFactory
 
     auto add_layer(std::unique_ptr<Layer> layer) -> void;
 
-    auto execute(Registry &registry) const -> Chunk;
+    auto execute(Registry &registry, int chunk_x, int chunk_y) const -> Chunk;
+
+    auto execute_update(Registry &registry, int chunk_x, int chunk_y, Chunk &chunk) const -> void;
 };
 #endif // A_CHUNK_H

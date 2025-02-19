@@ -2,9 +2,9 @@
 # ============================== 
 title = Map Generator
 fps = 60
-width = 800
-height = 800
-fullscreen = false
+width = 1920
+height = 1080
+fullscreen = true
 
 # In seconds, during development how often to reload from file
 reload_interval = 0.5
@@ -13,11 +13,12 @@ reload_interval = 0.5
 seed = 813
 
 # Global map scale
-global_map_scale = 60       # Unused
+global_map_scale = 0.25
+chunk_side_length = 128
 
 # Terrain generation settings
 # ============================== 
-terrain.scale = 400
+terrain.scale = 42
 terrain.redistribution = 1 
 terrain.fudge = 1.1
 terrain.frequency1 = 1
@@ -32,16 +33,16 @@ terrain.amplitude4 = 0.0140
 
 # Moisture settings
 # ===========================
-moisture.scale = 200
+moisture.scale = 220
 moisture.redistribution =  1
 moisture.fudge = 1.1
 moisture.frequency1 = 1
 moisture.frequency2 = 4
-moisture.frequency3 = 18
+moisture.frequency3 = 19
 moisture.frequency4 = 64
-moisture.amplitude1 = 8
-moisture.amplitude2 = 128
-moisture.amplitude3 = 4
+moisture.amplitude1 = 1
+moisture.amplitude2 = 0.5
+moisture.amplitude3 = 0.125
 moisture.amplitude4 = 0.0120
 
 

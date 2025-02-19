@@ -15,8 +15,10 @@ class Engine
 
     ChunkFactory factory;
     ChunkRenderer2D renderer;
-    ChunkTexture2D chunk_texture;
-    Chunk chunk;
+
+    std::vector<Chunk> chunks;
+    std::vector<ChunkTexture2D> chunk_textures;
+    int chunk_side_length, number_of_chunks_horizontal, number_of_chunks_vertical;
 
     int width, height, FPS, reload_interval;
     bool fullscreen;

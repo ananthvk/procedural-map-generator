@@ -18,6 +18,13 @@ auto Engine::load_config() -> void
     title = cfg.get("title").as_string();
     fullscreen = cfg.get("fullscreen").try_parse<bool>(false);
     reload_interval = cfg.get("reload_interval").try_parse<int>(1);
+    chunk_side_length = cfg.get("chunk_side_length").parse<int>();
+
+    number_of_chunks_horizontal =
+        static_cast<int>(std::ceil(static_cast<float>(width) / chunk_side_length));
+    number_of_chunks_vertical =
+        static_cast<int>(std::ceil(static_cast<float>(height) / chunk_side_length));
+
     config_changed = true;
 }
 
@@ -42,11 +49,44 @@ auto Engine::apply_config(bool is_update) -> void
         ToggleFullscreen();
         is_currently_in_fullscreen = false;
     }
-    chunk = factory.execute(registry);
-    if (is_update)
-        renderer.update_texture(chunk_texture, chunk);
+    if (is_update && chunks.size() == static_cast<size_t>(number_of_chunks_horizontal *
+                                                          number_of_chunks_vertical))
+    {
+        int idx = 0;
+        for (int i = 0; i < number_of_chunks_vertical; ++i)
+        {
+            for (int j = 0; j < number_of_chunks_horizontal; ++j)
+            {
+                // Update the chunk
+                factory.execute_update(registry, j, i, chunks[idx]);
+
+                // Update the texture
+                renderer.update_texture(chunk_textures[idx], chunks[idx]);
+                ++idx;
+            }
+        }
+    }
+
     else
-        chunk_texture = renderer.generate_texture(chunk);
+    {
+        chunks.clear();
+        for (auto &texture : chunk_textures)
+            texture.unload();
+        chunk_textures.clear();
+
+        // Create the initial chunks
+        for (int i = 0; i < number_of_chunks_vertical; ++i)
+        {
+            for (int j = 0; j < number_of_chunks_horizontal; ++j)
+            {
+                chunks.push_back(factory.execute(registry, j, i));
+            }
+        }
+
+        // Create textures for the chunks
+        for (auto &chunk : chunks)
+            chunk_textures.push_back(renderer.generate_texture(chunk));
+    }
 }
 
 Engine::Engine(const std::filesystem::path &data_folder_path)
@@ -94,7 +134,17 @@ auto Engine::draw() -> void
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    DrawTexture(chunk_texture.texture, 0, 0, RAYWHITE);
+
+    int idx = 0;
+    for (int i = 0; i < number_of_chunks_vertical; ++i)
+    {
+        for (int j = 0; j < number_of_chunks_horizontal; ++j)
+        {
+            DrawTexture(chunk_textures[idx].texture, j * chunk_side_length, i * chunk_side_length,
+                        RAYWHITE);
+            ++idx;
+        }
+    }
     DrawFPS(20, 20);
     DrawCircle(400, 400, 20, YELLOW);
     EndDrawing();
@@ -103,6 +153,7 @@ auto Engine::draw() -> void
 Engine::~Engine()
 {
     info("Closing application...");
-    chunk_texture.unload();
+    for (auto &chunk_texture : chunk_textures)
+        chunk_texture.unload();
     CloseWindow();
 }
